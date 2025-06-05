@@ -20,10 +20,10 @@ if menu == "Latest Predictions":
     if st.button("Run Forecast Pipeline"):
         with st.spinner("Running the forecast pipeline, please wait..."):
             scripts = [
-                "main_project/data/script/forecast.py",
-                "main_project/data/script/historical.py",
-                "main_project/data/script/process_daily_weather.py",
-                "main_project/predictions/forecast.py"
+                "data/script/forecast.py",
+                "data/script/historical.py",
+                "data/script/process_daily_weather.py",
+                "predictions/forecast.py"
             ]
             for script in scripts:
                 process = subprocess.Popen(
@@ -39,15 +39,15 @@ if menu == "Latest Predictions":
 
     if st.session_state['run_clicked']:
         try:
-            df = pd.read_csv("main_project/predictions/forecast_predictions.csv", parse_dates=["date"])
+            df = pd.read_csv("predictions/forecast_predictions.csv", parse_dates=["date"])
             today = datetime.now().date()
             end_date = today + timedelta(days=6)
             mask = (df["date"].dt.date >= today) & (df["date"].dt.date <= end_date)
             filtered = df.loc[mask]
 
-            with open("main_project/predictions/best-model/cooling/best_model_metrics.json") as f:
+            with open("predictions/best-model/cooling/best_model_metrics.json") as f:
                 cooling_metrics = json.load(f)
-            with open("main_project/predictions/best-model/heating/best_model_metrics.json") as f:
+            with open("predictions/best-model/heating/best_model_metrics.json") as f:
                 heating_metrics = json.load(f)
 
             train_dates = {
@@ -129,7 +129,7 @@ elif menu == "Models":
     uploaded_file = st.file_uploader("Upload the fault notifications Excel file", type=["xlsx"])
 
     if uploaded_file is not None:
-        save_path = "main_project/data/uploaded_data.xlsx"
+        save_path = "data/uploaded_data.xlsx"
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         with open(save_path, "wb") as f:
             f.write(uploaded_file.getbuffer())
@@ -140,9 +140,9 @@ elif menu == "Models":
         logs = ""
 
         scripts = [
-            "main_project/data/update.py",
-            "main_project/predictions/cooling.py",
-            "main_project/predictions/heating.py"
+            "data/update.py",
+            "predictions/cooling.py",
+            "predictions/heating.py"
         ]
 
         for script in scripts:
@@ -166,7 +166,7 @@ elif menu == "Models":
         import plotly.graph_objects as go
 
         try:
-            with open("main_project/predictions/best-model/cooling/best_model_metrics.json") as f:
+            with open("predictions/best-model/cooling/best_model_metrics.json") as f:
                 cooling_metrics_data = json.load(f)
             all_metrics = cooling_metrics_data.get("all_metrics", {})
         except Exception as e:
@@ -253,7 +253,7 @@ Whether the model reliably predicts across the full range of data, or if there a
         model_names = ["Cooling", "Heating"]
         for model in model_names:
             st.subheader(f"{model} Model Plots")
-            base_path = f"main_project/predictions/plots/{model.lower()}/"
+            base_path = f"predictions/plots/{model.lower()}/"
             for generic_filename_key, explanation in plot_types.items():
                 name_part, ext_part = os.path.splitext(generic_filename_key)
                 actual_plot_filename = f"{name_part}-{model.lower()}{ext_part}"
